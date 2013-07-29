@@ -4,9 +4,13 @@ git-tool
 Manage multiple git repos quicker and easier than doing it by hand ;)
 
 If you name your Git repos with `*.git` extensions, then this tool can do
-different checks on that repo to see if you have files that need to be
-indexed/committed, or pushed to the remote.  Can also do a "mass pull" of all
-of your Git repos at one time.
+different checks on those repos.  For example, you can see if you have files
+that need to be indexed/committed, or repos that need to be pushed to the
+remote.  Can also do a "mass pull" of all of your Git repos (as `*.git`
+directories) at one time.
+
+This tool should work with any OS that has a copy of `bash`; note that the
+Windows CLI version of Git does include it's own copy of `bash.exe` ;)
 
 Copyright (c)2013 Brian Manning <brian at xaoc dot org>
 
