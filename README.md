@@ -3,6 +3,26 @@ git-tool
 
 Manage multiple git repos quicker and easier than doing it by hand ;)
 
+If you name your Git repos with `*.git` extensions, then this tool can do
+different checks on that repo to see if you have files that need to be
+indexed/committed, or pushed to the remote.  Can also do a "mass pull" of all
+of your Git repos at one time.
+
+Copyright (c)2013 Brian Manning <brian at xaoc dot org>
+
+License: GPL v2 (see licence blurb at the bottom of the `git-tool.sh` file)
+
+- Clone the script repo with:
+  - `git clone https://github.com/spicyjack/git-tool.git`
+- Script also can be obtained from:
+  - https://github.com/spicyjack/git-tool/blob/master/git-tool.sh
+- Get support and more info about this script at:
+  - https://github.com/spicyjack/git-tool/issues
+
+This tool is somewhat similar to what the `repo` (http://tinyurl.com/6pblfg4)
+tool, sans the messy XML manifest bits needed that `repo` uses to do it's job.
+
+
 View script usage with `git-tool.sh --help`, and view examples of script usage
 with `git-tool.sh --examples` (reproduced below).
 
