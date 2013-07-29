@@ -1,5 +1,8 @@
 git-tool
 ========
+Copyright (c)2013 Brian Manning <brian at xaoc dot org>
+
+License: GPL v2 (see licence blurb at the bottom of the `git-tool.sh` file)
 
 Manage multiple git repos quicker and easier than doing it by hand ;)
 
@@ -11,10 +14,6 @@ directories) at one time.
 
 This tool should work with any OS that has a copy of `bash`; note that the
 Windows CLI version of Git does include it's own copy of `bash.exe` ;)
-
-Copyright (c)2013 Brian Manning <brian at xaoc dot org>
-
-License: GPL v2 (see licence blurb at the bottom of the `git-tool.sh` file)
 
 - Clone the script repo with:
   - `git clone https://github.com/spicyjack/git-tool.git`
