@@ -107,19 +107,9 @@ rungitcmd() {
     local GIT_CMD="$1"
     local GIT_NOTIFY_PATTERN="$2"
 
-    ORIG_IFS=$IFS
-    IFS=$' \t'
-    GIT_OUTPUT=$(${GIT_CMD} 2>&1)
+    eval ${GIT_CMD} 2>&1
     GIT_CMD_EXIT_STATUS=$?
-    check_exit_status $GIT_CMD_EXIT_STATUS "${GIT_CMD}" "${GIT_OUTPUT}"
-    if [ $GIT_CMD_EXIT_STATUS -eq 0 ]; then
-        if [ $(echo ${GIT_OUTPUT} | grep -c "${GIT_NOTIFY_PATTERN}") -gt 0 ];
-        then
-            colorize $MSG_REMOTE "${GIT_OUTPUT}"
-            $ECHO_CMD $COLORIZE_OUT
-        fi
-    fi
-    IFS=$ORIG_IFS
+    check_exit_status $GIT_CMD_EXIT_STATUS "${GIT_CMD}" "(see above)"
 }
 
 # check the status in git directories
@@ -162,22 +152,16 @@ pullall() {
     rungitcmd "$GIT_CMD" "$GIT_NOTIFY_PATTERN"
 }
 
-# FIXME this is broken, the CHECK_DATE is never passed in
 updatechk() {
     local SHORT_DIR="$1"
     local CHECK_DATE="$2"
 
-    if [ -z $CHECK_DATE ]; then
-        echo "ERROR: need a date to check; date format is YYYY-MM-DD"
-        exit 1
-    else
-        echo "- $SHORT_DIR";
-        #cd $DIR
-        GIT_CMD="git log --pretty=format:\"%h %cd %an %s\" \
-            --after="${CHECK_DATE}" | cut -c -80)"
-        GIT_NOTIFY_PATTERN="git"
-        rungitcmd "$GIT_CMD" "$GIT_NOTIFY_PATTERN"
-    fi
+    echo "- $SHORT_DIR";
+    #cd $DIR
+    GIT_CMD="git log --pretty=format:\"%h %cd %an %s\" \
+        --after=\"${CHECK_DATE}\" | cut -c -80"
+    GIT_NOTIFY_PATTERN="git"
+    rungitcmd "$GIT_CMD" "$GIT_NOTIFY_PATTERN"
 }
 
 # check for inbound changes to git directories
@@ -219,6 +203,7 @@ refchk() {
 recurse_path() {
     local RECURSE_PATH="$1"
     local GIT_TOOL_CMD="$2"
+    local GIT_UPDATE_DATE="$3"
     # use find to find directories, use \0 as the delimiter in the output
     find "${RECURSE_PATH}" -maxdepth 1 -type d -name "[a-zA-Z0-9_]*" -print0 \
         | sort -z | while IFS= read -d $'\0' CURR_PATH;
@@ -247,10 +232,26 @@ recurse_path() {
             #colorize $MSG_FLUFF ": Running 'git ${GIT_TOOL_CMD}'"
             #$ECHO_CMD $COLORIZE_OUT
             SHORT_DIR=$(echo "${CURR_PATH}" | sed "s!${REPO_PATH}!!g; s!^/!!;")
-            if [ $DRY_RUN -gt 0 ]; then
-                echo "git command dry-run: ${GIT_TOOL_CMD} in ${SHORT_DIR}"
+            # for 'updatechk'
+            if [ $GIT_TOOL_CMD = 'updatechk' ]; then
+                if [ -z $GIT_UPDATE_DATE ]; then
+                    echo "ERROR: need a date to check;"
+                    echo "date format is YYYY-MM-DD"
+                    exit 1
+                fi
+                if [ $DRY_RUN -gt 0 ]; then
+                    echo "dry-run: ${GIT_TOOL_CMD}/${GIT_UPDATE_DATE}"
+                    echo "dry-run: Running command in '${SHORT_DIR}'"
+                else
+                    $GIT_TOOL_CMD "${SHORT_DIR}" "${GIT_UPDATE_DATE}"
+                fi
             else
-                $GIT_TOOL_CMD "${SHORT_DIR}"
+                # for all other commands
+                if [ $DRY_RUN -gt 0 ]; then
+                    echo "dry-run: Running ${GIT_TOOL_CMD} in '${SHORT_DIR}'"
+                else
+                    $GIT_TOOL_CMD "${SHORT_DIR}"
+                fi
             fi
             cd "$START_PATH"
         else
@@ -448,7 +449,15 @@ if [ -z $REPO_PATH ]; then
 fi
 
 # Tell the rest of the script what command the user asked for
-GIT_TOOL_CMD=$*
+if [ $# -gt 1 ]; then
+    # the 'updatechk' command takes an argument, all other commands just need
+    # the name of the command
+    GIT_TOOL_CMD=$1
+    GIT_UPDATE_DATE=$2
+else
+    GIT_TOOL_CMD=$1
+fi
+#GIT_TOOL_CMD="$*"
 if [ -z $GIT_TOOL_CMD ]; then
     colorize "$MSG_FAIL" "ERROR: missing 'command' to run"
     $ECHO_CMD $COLORIZE_OUT
@@ -472,7 +481,7 @@ if [ $QUIET -eq 0 ]; then
     colorize_clear
 fi
 
-recurse_path "$REPO_PATH" "$GIT_TOOL_CMD"
+recurse_path "$REPO_PATH" "$GIT_TOOL_CMD" "$GIT_UPDATE_DATE"
 
 # exit cleanly if we reach here
 #if [ $QUIET -eq 0 ]; then
