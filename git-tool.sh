@@ -27,6 +27,8 @@ QUIET=0
 
 # colorize? yes please (1=yes, colorize, 0=no, don't colorize)
 COLORIZE=1
+# always colorize?  set via --colorize
+ALWAYS_COLORIZE=0
 
 # dry-run, i.e. show commands, don't run them? (0 = no, 1 = yes)
 DRY_RUN=0
@@ -304,7 +306,7 @@ ${SCRIPTNAME} [options] <command>
     -e|--examples   Show examples of script usage
     -q|--quiet      No script output (unless an error occurs)
     -n|--dry-run    Explain what will be done, don't actually do it
-    -c|--nocolor    Don't use colorized status messages (good for scripting)
+    -c|--colorize   Always colorize output, ignore '-t' test
 
     OPTIONS FOR DIRECTORY PATHS
     -p|--path       Starting path for searching for Git repos
@@ -316,7 +318,7 @@ ${SCRIPTNAME} [options] <command>
     refchk          Run 'git status', can show files not synced with remote
     outchk          Run 'git push --dry-run'; shows commits needing pushing
     inchk           Run 'git pull --dry-run'; shows commits needing pulling
-    updatechk       Shows all repos that have been updated since YYYY-MM-DD
+    updatechk       Shows all repos that have been updated since 'YYYY-MM-DD'
 
 NOTES:
 - Long switches (GNU extension) do not work with BSD 'getopt'
@@ -367,9 +369,7 @@ if [ $OSDETECT = "Darwin" -a $GETOPT_BIN = "/usr/bin/getopt" ]; then
 else
 # Use short and long options with GNU's getopt
     GETOPT_TEMP=$(${GETOPT_BIN} -o heqncp:x: \
-        --long help,examples,quiet,dry-run,explain \
-        --long color,nocolor,no-color \
-        --long path:,exclude: \
+        --long help,examples,quiet,dry-run,colorize,path:,exclude: \
         -n "${SCRIPTNAME}" -- "$@")
 fi
 
@@ -405,8 +405,8 @@ while true ; do
             QUIET=1
             shift;;
         # Don't use color in the output
-        -c|--nocolor|--color|--no-color)
-            COLORIZE=0
+        -c|--colorize)
+            ALWAYS_COLORIZE=1
             shift;;
         # Explain what will be done, don't actually do
         -n|--dry-run|--explain)
@@ -434,11 +434,11 @@ while true ; do
 done
 
 ### SCRIPT MAIN LOOP ###
-# if we're outputting to a pipe set NO_COLORIZATION
-# FIXME you can use `less -R` to read ANSI colorization sequences; have some
-# way to override the test for pipe below
+# if we're outputting to a pipe, don't colorize, unless ALWAYS_COLORIZE is set
 if [ ! -t 1 ]; then
-    COLORIZE=0
+    if [ $ALWAYS_COLORIZE -eq 0 ]; then
+        COLORIZE=0
+    fi
 fi
 
 # do some error checking; we need at a minimum '--path' and a <command> to run
