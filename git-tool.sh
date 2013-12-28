@@ -109,9 +109,9 @@ rungitcmd() {
     local GIT_CMD="$1"
     local GIT_NOTIFY_PATTERN="$2"
 
-    eval ${GIT_CMD} 2>&1
+    CMD_OUT=$(${GIT_CMD} 2>&1)
     GIT_CMD_EXIT_STATUS=$?
-    check_exit_status $GIT_CMD_EXIT_STATUS "${GIT_CMD}" "(see above)"
+    check_exit_status $GIT_CMD_EXIT_STATUS "${GIT_CMD}" "${CMD_OUT}"
 }
 
 # check the status in git directories
