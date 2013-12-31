@@ -109,9 +109,16 @@ rungitcmd() {
     local GIT_CMD="$1"
     local GIT_NOTIFY_PATTERN="$2"
 
-    CMD_OUT=$(${GIT_CMD} 2>&1)
+    CMD_OUT=$(eval ${GIT_CMD} 2>&1)
     GIT_CMD_EXIT_STATUS=$?
     check_exit_status $GIT_CMD_EXIT_STATUS "${GIT_CMD}" "${CMD_OUT}"
+    if [ $GIT_CMD_EXIT_STATUS -eq 0 ]; then
+        if [ $(echo ${CMD_OUT} | grep -c "${GIT_NOTIFY_PATTERN}") -gt 0 ];
+        then
+            colorize $MSG_REMOTE "${GIT_OUTPUT}"
+            $ECHO_CMD $COLORIZE_OUT
+        fi
+    fi
 }
 
 # check the status in git directories
@@ -160,10 +167,22 @@ updatechk() {
 
     echo "- $SHORT_DIR";
     #cd $DIR
-    GIT_CMD="git log --pretty=format:\"%h %cd %an %s\" \
+    OLD_IFS=$IFS
+    IFS=$' \t'
+    GIT_CMD="git log --pretty=format:\"%h %ci %an %s\" \
         --after=\"${CHECK_DATE}\" | cut -c -80"
     GIT_NOTIFY_PATTERN="git"
-    rungitcmd "$GIT_CMD" "$GIT_NOTIFY_PATTERN"
+    CMD_OUT=$(eval ${GIT_CMD} 2>&1)
+    GIT_CMD_EXIT_STATUS=$?
+    check_exit_status $GIT_CMD_EXIT_STATUS "${GIT_CMD}" "${CMD_OUT}"
+    if [ $GIT_CMD_EXIT_STATUS -eq 0 ]; then
+        if [ $(echo ${CMD_OUT} | wc -c) -gt 1 ];
+        then
+            colorize $MSG_REMOTE "${CMD_OUT}"
+            $ECHO_CMD $COLORIZE_OUT
+        fi
+    fi
+    IFS=$OLD_IFS
 }
 
 # check for inbound changes to git directories
