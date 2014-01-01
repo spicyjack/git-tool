@@ -109,6 +109,8 @@ rungitcmd() {
     local GIT_CMD="$1"
     local GIT_NOTIFY_PATTERN="$2"
 
+    OLD_IFS=$IFS
+    IFS=$' \t'
     CMD_OUT=$(eval ${GIT_CMD} 2>&1)
     GIT_CMD_EXIT_STATUS=$?
     check_exit_status $GIT_CMD_EXIT_STATUS "${GIT_CMD}" "${CMD_OUT}"
@@ -119,6 +121,8 @@ rungitcmd() {
             $ECHO_CMD $COLORIZE_OUT
         fi
     fi
+    IFS=$OLD_IFS
+
 }
 
 # check the status in git directories
