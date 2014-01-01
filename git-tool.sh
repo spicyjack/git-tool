@@ -138,7 +138,7 @@ pullorigin() {
     local SHORT_DIR="$1"
 
     echo "- $SHORT_DIR"
-    GIT_CMD="git pull origin master"
+    GIT_CMD="git pull origin"
     GIT_NOTIFY_PATTERN="From"
     rungitcmd "$GIT_CMD" "$GIT_NOTIFY_PATTERN"
 }
@@ -147,7 +147,7 @@ pullgithub() {
     local SHORT_DIR="$1"
 
     echo "- $SHORT_DIR"
-    GIT_CMD="git pull github master"
+    GIT_CMD="git pull github"
     GIT_NOTIFY_PATTERN="From"
     rungitcmd "$GIT_CMD" "$GIT_NOTIFY_PATTERN"
 }
