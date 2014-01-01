@@ -115,7 +115,7 @@ rungitcmd() {
     if [ $GIT_CMD_EXIT_STATUS -eq 0 ]; then
         if [ $(echo ${CMD_OUT} | grep -c "${GIT_NOTIFY_PATTERN}") -gt 0 ];
         then
-            colorize $MSG_REMOTE "${GIT_OUTPUT}"
+            colorize $MSG_REMOTE "${CMD_OUT}"
             $ECHO_CMD $COLORIZE_OUT
         fi
     fi
