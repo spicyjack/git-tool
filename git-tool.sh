@@ -363,7 +363,7 @@ else
 fi
 
 if [ $OSDETECT = "Darwin" ]; then
-    ECHO_CMD="builtin echo"
+    ECHO_CMD="echo"
 elif [ $OSDETECT = "Linux" ]; then
     ECHO_CMD="builtin echo -e"
 else
