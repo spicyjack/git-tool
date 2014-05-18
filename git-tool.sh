@@ -239,14 +239,16 @@ recurse_path() {
             continue
         fi
         # check to see if we skip this directory
-        if [ -n "$EXCLUDED_PATHS" -a $(echo ${CURR_PATH} \
-            | egrep -c "$EXCLUDED_PATHS") -gt 0 ];
-        then
-            if [ $QUIET -eq 0 ]; then
-                colorize "$MSG_FLUFF" "--> Skipping ${CURR_PATH} <--"
-                $ECHO_CMD $COLORIZE_OUT
+        if [ "x$EXCLUDED_PATHS" != "x" ]; then
+            GREP_COUNT=$(echo ${CURR_PATH} | egrep -c "$EXCLUDED_PATHS")
+            if [ $(echo ${CURR_PATH} | egrep -c "$EXCLUDED_PATHS") -gt 0 ];
+            then
+                #if [ $QUIET -eq 0 ]; then
+                    colorize "$MSG_FLUFF" "--> Skipping ${CURR_PATH} <--"
+                    $ECHO_CMD $COLORIZE_OUT
+                #fi
+                continue
             fi
-            continue
         fi
         # is CURR_PATH a *.git directory?
         if [ $(echo "${CURR_PATH}" | grep -c "\.git$") -gt 0 ]; then
@@ -285,7 +287,7 @@ recurse_path() {
             RECURSION_DEPTH=$(($RECURSION_DEPTH + 1))
             #colorize $MSG_INFO "Recursing into: ${CURR_PATH}"
             #$ECHO_CMD $COLORIZE_OUT
-            recurse_path "${CURR_PATH}" "${GIT_TOOL_CMD}"
+            recurse_path "${CURR_PATH}" "${GIT_TOOL_CMD}" "${GIT_UPDATE_DATE}"
             # take the counter back to where it started
             RECURSION_DEPTH=$(($RECURSION_DEPTH - 1))
         fi
@@ -471,15 +473,7 @@ if [ -z $REPO_PATH ]; then
     exit 1
 fi
 
-# Tell the rest of the script what command the user asked for
-if [ $# -gt 1 ]; then
-    # the 'updatechk' command takes an argument, all other commands just need
-    # the name of the command
-    GIT_TOOL_CMD=$1
-    GIT_UPDATE_DATE=$2
-else
-    GIT_TOOL_CMD=$1
-fi
+GIT_TOOL_CMD=$1
 #GIT_TOOL_CMD="$*"
 if [ -z $GIT_TOOL_CMD ]; then
     colorize "$MSG_FAIL" "ERROR: missing 'command' to run"
@@ -488,6 +482,11 @@ if [ -z $GIT_TOOL_CMD ]; then
     echo " - Use ${SCRIPTNAME} --help for script options"
     echo " - Use ${SCRIPTNAME} --examples for usage examples"
     exit 1
+fi
+
+# Tell the rest of the script what command the user asked for
+if [ $# -gt 1 ]; then
+    GIT_UPDATE_DATE=$2
 fi
 
 colorize_clear
@@ -499,6 +498,11 @@ if [ $QUIET -eq 0 ]; then
     colorize_clear
     colorize "$MSG_FLUFF" "--- Repo path: "
     colorize "$MSG_INFO" "${REPO_PATH}"
+    colorize "$MSG_FLUFF" " ---"
+    $ECHO_CMD $COLORIZE_OUT
+    colorize_clear
+    colorize "$MSG_FLUFF" "--- Excluded path(s): "
+    colorize "$MSG_INFO" "${EXCLUDED_PATHS}"
     colorize "$MSG_FLUFF" " ---"
     $ECHO_CMD $COLORIZE_OUT
     colorize_clear
