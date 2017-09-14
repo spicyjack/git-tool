@@ -374,7 +374,7 @@ fi
 
 # these paths cover a majority of my test machines
 for GETOPT_CHECK in "/opt/local/bin/getopt" "/usr/local/bin/getopt" \
-    "/usr/bin/getopt";
+    "/usr/bin/getopt" "/usr/local/opt/gnu-getopt/bin/";
 do
     if [ -x "${GETOPT_CHECK}" ]; then
         GETOPT_BIN=$GETOPT_CHECK
